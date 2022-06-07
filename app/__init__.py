@@ -1,6 +1,6 @@
 from flask import Flask
 # can import home directly from the routes package, because its __init__.py file imported (and renamed) the blueprint
-from app.routes import home, dashboard
+from app.routes import home, dashboard, api
 from app.db import init_db
 from app.utils import filters
 
@@ -19,6 +19,7 @@ def create_app(test_config=None):
     # register routes
     app.register_blueprint(home)
     app.register_blueprint(dashboard)
+    app.register_blueprint(api)
 
     # register jinja filters
     app.jinja_env.filters['format_url'] = filters.format_url
