@@ -178,4 +178,3 @@ def delete(id):
     return jsonify(message = 'Post not found'), 404
 
   return '', 204
-
