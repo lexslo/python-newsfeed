@@ -4,7 +4,8 @@ from unittest.mock import patch, MagicMock
 from app.models import User, Post, Comment, Vote
 
 # case of successful signup
-@patch("app.db.get_db")
+# @patch("app.db.Session")
+@patch("app.routes.api.get_db")
 def test_signup_success(mock_get_db, client):
     # mock the dependencies
     # use MagicMock to mock db.add(newUser) and db.commit()
@@ -25,5 +26,51 @@ def test_signup_success(mock_get_db, client):
     print('Response: ', response)
     # assert that MagicMock object is used
     mock_get_db.assert_called()
+
+
+@patch("app.routes.api.get_db")
+def test_signup_bad_email(mock_get_db, client):
+    # mock the dependencies
+    # use MagicMock to mock db.add(newUser) and db.commit()
+    # MagicMock() used for purpose of testing
+    mock_get_db.return_value = MagicMock()
+
+    data = {
+        "username": "Test Human",
+        "email": "email",
+        "password": "password"
+    }
+
+    # call the endpoint
+    response = client.post(path='/api/users', json=json.dumps(data))
+
+    # ensure there is a response from db
+    assert response.status_code == 500
+    print('Response: ', response)
+    # assert that MagicMock object is used
+    mock_get_db.assert_called()
+
+    # assert False
+
+@patch("app.routes.api.get_db")
+# goes first in parameters
+@patch("app.utils.auth.session.get")
+def test_upvote_success(mock_get_session, mock_get_db, client):
+    mock_get_session.return_value = True
+    mock_get_db.return_value = MagicMock()
+
+    data = {
+        "post_id": 333,
+        "user_id": 111
+    }
+
+    response = client.put(path='api/posts/upvote', json=json.dumps(data))
+
+    assert response.status_code == 200
+    print('Response', response)
+
+    mock_get_db.assert_called()
+    mock_get_session.assert_called()
+
 
 

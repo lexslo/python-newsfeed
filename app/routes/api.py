@@ -1,3 +1,4 @@
+import json
 import sys
 from flask import Blueprint, request, jsonify, session
 from app.models import User, Post, Comment, Vote
@@ -10,18 +11,21 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 # specify the method to be of type POST
 @bp.route('/users', methods=['POST'])
 def signup():
+    print('In Signup function')
     data = request.get_json()
     db = get_db()
+    print('db: ', db)
 
     # attempt to create new user
     try:
+        userData = json.loads(data)
+        print('Data: ', userData['username'], userData['email'], userData['password'])
         # create a new user using dictionary syntax data['property']
         newUser = User(
-            username = data['username'],
-            email = data['email'],
-            password = data['password']
+            username = userData['username'],
+            email = userData['email'],
+            password = userData['password']
         )
-
         # save in database
         db.add(newUser)
         db.commit()
@@ -101,9 +105,10 @@ def upvote():
     db = get_db()
 
     try:
+        vote_data = json.loads(data)
         # create a new vote w/ incoming id and session id
         newVote = Vote(
-            post_id = data['post_id'],
+            post_id = vote_data['post_id'],
             user_id = session.get('user_id')
         )
 
@@ -116,7 +121,7 @@ def upvote():
         db.rollback()
         return jsonify(message = 'Upvote failed'), 500
 
-    return '', 204
+    return '', 200
 
 @bp.route('/posts', methods=['POST'])
 @login_required
@@ -178,3 +183,4 @@ def delete(id):
     return jsonify(message = 'Post not found'), 404
 
   return '', 204
+

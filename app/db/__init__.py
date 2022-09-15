@@ -26,6 +26,7 @@ def get_db():
     # saves the current connection on the g object, if it's not already there
     if  'db' not in g:
         # store connection in app context
+        print('Inside get_db()')
         g.db = Session()
     # returns the connection from the g object instead of creating a new Session instance each time
     return g.db
