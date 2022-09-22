@@ -1,7 +1,10 @@
 # test signup()
 import json
 from unittest.mock import patch, MagicMock
+
+from app.db import Session
 from app.models import User, Post, Comment, Vote
+
 
 # case of successful signup
 # @patch("app.db.Session")
@@ -54,10 +57,25 @@ def test_signup_bad_email(mock_get_db, client):
 
 @patch("app.routes.api.get_db")
 # goes first in parameters
-@patch("app.utils.auth.session.get")
-def test_upvote_success(mock_get_session, mock_get_db, client):
-    mock_get_session.return_value = True
-    mock_get_db.return_value = MagicMock()
+@patch.object(User, "verify_password")
+def test_upvote_success(mock_verify_pw, mock_get_db, client):
+    mock = MagicMock()
+    # nested mocks
+    mock.query.return_value.filter.return_value.one.return_value = User(email = "email@t.co", password = "password123")
+    mock_get_db.return_value = mock
+    # mock verify_password
+    mock_verify_pw.return_value = True
+    # mock_db_query.return_value = User(email = "email@t.co")
+
+    # call login endpoint
+    email = {
+        "email":"email@t.co",
+        "password":"password123"
+    }
+    login = client.post(path='api/users/login', json=json.dumps(email))
+    assert login.status_code == 200
+    # mock_get_session.return_value = True
+
 
     data = {
         "post_id": 333,
@@ -70,7 +88,7 @@ def test_upvote_success(mock_get_session, mock_get_db, client):
     print('Response', response)
 
     mock_get_db.assert_called()
-    mock_get_session.assert_called()
+    # mock_get_session.assert_called()
 
 
 

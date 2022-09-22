@@ -52,25 +52,32 @@ def logout():
 
 @bp.route('/users/login', methods=['POST'])
 def login():
+    print('inside login function')
     data = request.get_json()
     db = get_db()
 
     # check if email address entered is in database
     try:
-        user = db.query(User).filter(User.email == data['email']).one()
+        user_data = json.loads(data)
+        user = db.query(User)
+        user_filtered = user.filter(User.email == user_data['email'])
+        one_user = user_filtered.one()
+        print('user is ', user)
+        print('user_filtered is ', user_filtered)
+        print("in line 63 of api.py and one_user is: ", one_user)
     except:
         print(sys.exc_info()[0])
 
         return jsonify(message = 'Incorrect credentials'), 400
 
-    if user.verify_password(data['password']) == False:
+    if one_user.verify_password(user_data['password']) == False:
         return jsonify(message = 'Incorrect credentials'), 400
 
     session.clear()
-    session['user.id'] = user.id
+    session['user.id'] = one_user.id
     session['loggedIn'] = True
 
-    return jsonify(id = user.id)
+    return jsonify(id = one_user.id)
 
 @bp.route('/comments', methods=['POST'])
 @login_required

@@ -10,12 +10,15 @@ def login_required(func):
 
     # TODO: add print statements to debug the RuntimeError call, confirm function is called
     def wrapped_function(*args, **kwargs):
+        print('in line 13 of auth.py')
         # if logged in, call original function with original arguments
         if session.get('loggedIn') == True:
-          return func(*args, **kwargs)
 
+          return func(*args, **kwargs)
+        print('before redirect to login')
         return redirect('/login')
 
+    print('inside login_required')
     return wrapped_function
 
 
